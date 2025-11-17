@@ -1,46 +1,35 @@
-import { useEffect } from 'react'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 
-// Floating liquid-glass mascot that gently follows the cursor across the site
+// Floating liquid-glass mascot that glides with page scroll (not the mouse)
 export default function Mascot() {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
+  const { scrollYProgress } = useScroll()
 
-  // Smooth follow springs
-  const x = useSpring(mouseX, { stiffness: 60, damping: 12, mass: 0.6 })
-  const y = useSpring(mouseY, { stiffness: 60, damping: 12, mass: 0.6 })
-
-  // Subtle tilt based on direction
-  const rot = useTransform([x, y], ([vx, vy]) => {
-    const cx = typeof window !== 'undefined' ? window.innerWidth / 2 : 0
-    const cy = typeof window !== 'undefined' ? window.innerHeight / 2 : 0
-    const dx = (vx - cx) / cx
-    const dy = (vy - cy) / cy
-    return dx * 6 - dy * 4
-  })
-
+  // Track viewport height to map scroll to viewport-relative positions
+  const [vh, setVh] = useState(0)
   useEffect(() => {
-    const handle = (e) => {
-      const w = window.innerWidth
-      const h = window.innerHeight
-      // Keep within safe viewport padding
-      const px = Math.max(80, Math.min(e.clientX, w - 80))
-      const py = Math.max(80, Math.min(e.clientY, h - 120))
-      mouseX.set(px)
-      mouseY.set(py)
-    }
-    window.addEventListener('mousemove', handle)
-    // Initial position bottom right
-    mouseX.set(typeof window !== 'undefined' ? window.innerWidth - 120 : 0)
-    mouseY.set(typeof window !== 'undefined' ? window.innerHeight - 160 : 0)
-    return () => window.removeEventListener('mousemove', handle)
-  }, [mouseX, mouseY])
+    const update = () => setVh(typeof window !== 'undefined' ? window.innerHeight : 0)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
+  // Vertical glide between 15% and 75% of viewport as you scroll the page
+  const rawY = useTransform(scrollYProgress, [0, 1], [() => vh * 0.15, () => vh * 0.75])
+  const y = useSpring(rawY, { stiffness: 60, damping: 16, mass: 0.7 })
+
+  // Gentle horizontal drift across the viewport while scrolling
+  const rawX = useTransform(scrollYProgress, [0, 1], [-80, 80])
+  const x = useSpring(rawX, { stiffness: 60, damping: 16, mass: 0.7 })
+
+  // Subtle rotation tied to horizontal drift
+  const rot = useTransform(x, [ -120, 0, 120 ], [ -6, 0, 6 ])
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[60]" aria-hidden>
       <motion.div
-        style={{ x: x, y: y, rotate: rot }}
-        className="relative w-24 h-24 -translate-x-1/2 -translate-y-1/2"
+        style={{ x, y, rotate: rot }}
+        className="relative w-24 h-24 left-[85%] sm:left-[88%] md:left-[90%] -translate-x-1/2"
       >
         {/* Body */}
         <div className="relative w-full h-full rounded-[2rem] glass-mascot">
@@ -75,7 +64,7 @@ export default function Mascot() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, type: 'spring', stiffness: 300, damping: 20 }}
         >
-          Hi, ich begleite dich ✨
+          Ich gleite mit dir durch die Seite ✨
         </motion.div>
       </motion.div>
     </div>

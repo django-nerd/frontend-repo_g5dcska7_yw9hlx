@@ -4,6 +4,7 @@ import ThreeServices from './components/ThreeServices'
 import CTA from './components/CTA'
 import Contact from './components/Contact'
 import Mascot from './components/Mascot'
+import LiquidGlassSection from './components/LiquidGlassSection'
 
 function App() {
   return (
@@ -16,10 +17,21 @@ function App() {
 
       <Navbar />
       <main>
-        <IGGLOStyleHero />
-        <ThreeServices />
-        <CTA />
-        <Contact />
+        <LiquidGlassSection id="home">
+          <IGGLOStyleHero />
+        </LiquidGlassSection>
+
+        <LiquidGlassSection id="services" title="Leistungen" subtitle="Landing Pages, Multi‑page Websites und Shop Pages mit moderner 3D‑Optik und Micro‑Interactions.">
+          <ThreeServices />
+        </LiquidGlassSection>
+
+        <LiquidGlassSection id="cta" title="Bereit für Liquid‑Glass Webdesign?" subtitle="Erhalte ein maßgeschneidertes Angebot – schnell, klar und leistungsstark.">
+          <CTA />
+        </LiquidGlassSection>
+
+        <LiquidGlassSection id="contact" title="Erzähl uns von deinem Projekt" subtitle="Schnelles, unverbindliches Angebot.">
+          <Contact />
+        </LiquidGlassSection>
       </main>
       <footer className="py-10 border-t border-white/10 mt-10 bg-transparent">
         <div className="container mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -32,7 +44,7 @@ function App() {
         </div>
       </footer>
 
-      {/* Site-wide companion mascot */}
+      {/* Site-wide companion mascot that glides with the page */}
       <Mascot />
     </div>
   )
